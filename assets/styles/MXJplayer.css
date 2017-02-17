@@ -1,0 +1,108 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.MXJplayer {
+    width: 400px;
+    height: 600px;
+    border: 1px solid #333;
+    position: relative;
+}
+
+
+/*---------------------进度条面板样式---------------*/
+
+.MXJplayer .progress-panel {
+    height: 40px;
+    width: 96%;
+    border-top: 1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
+    position: absolute;
+    top: 300px;
+    display: flex;
+    flex-direction: column;
+    margin-left: 2%;
+}
+
+.MXJplayer .progress-panel .progress-position {
+    position: absolute;
+    height: 10px;
+    margin-top: 15px;
+    border-radius: 10px;
+}
+
+
+/*----进度条背景---*/
+
+.MXJplayer .progress-panel .progress-background {
+    z-index: 0;
+    width: 100%;
+    background-color: #eeeeee;
+}
+
+
+/*-----加载进度条----*/
+
+.MXJplayer .progress-panel .progress-load {
+    z-index: 1;
+    width: 30px;
+    background-color: #cccccc;
+}
+
+
+/*------当前播放进度条-----*/
+
+.MXJplayer .progress-panel .progress-player {
+    z-index: 2;
+    width: 20px;
+    background-color: orange;
+}
+
+
+/*-----------进度条上的控制点-------------*/
+
+.MXJplayer .progress-panel .progress-control-pointer {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin-top: 10px;
+    background-color: orange;
+    border: 5px solid #eeeeee;
+    border-radius: 20px;
+    z-index: 3;
+}
+
+
+/*----------------控制面板样式------------------*/
+
+.MXJplayer .control-panel {
+    width: 100%;
+    height: 60px;
+    background-color: red;
+    position: absolute;
+    top: 400px;
+    display: flex;
+    flex-direction: row;
+}
+
+.MXJplayer .control-panel .control-btn {
+    width: 33.33%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.MXJplayer .control-panel .prev {
+    background-color: red;
+}
+
+.MXJplayer .control-panel .play-stop {
+    background-color: orange;
+}
+
+.MXJplayer .control-panel .next {
+    background-color: blue;
+}
