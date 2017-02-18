@@ -1,16 +1,19 @@
+//playlist数据格式
+// {
+//         id: 0, //数据库主键
+//         song: "", //歌名
+//         time: "", //音频总时长
+//         lrc: "", //lrc地址
+//         singer: "", //歌手
+//         lyrics: "", //作词
+//         composer: "", //作曲
+// }
+
 function MXJplayer() {
     //播放器对象
     this.Audio = null;
     //播放列表
-    this.playList = [{
-        id: 0, //数据库主键
-        song: "", //歌名
-        time: "", //音频总时长
-        lrc: "", //lrc地址
-        singer: "", //歌手
-        lyrics: "", //作词
-        composer: "", //作曲
-    }]; //播放列表
+    this.playList = []; //播放列表
     this.currentIndex = 0; //当前播放音频在播放列表中的下标
     this.currentTime = 0; //当前音频播放到第几秒了
     this.currentSrc = ""; //当前音频的src地址
@@ -18,6 +21,7 @@ function MXJplayer() {
     this.loadProgress = 0.2; //音频加载进度，使用的时候乘以100%
     this.timer = null; //计时器对象
     this.init();
+    this.initEvent();
 }
 
 MXJplayer.prototype = {
@@ -25,14 +29,15 @@ MXJplayer.prototype = {
     //初始化方法
     init: function() {
         this.utils().createAudioHtml();
-        this.utils().createPlayerPanel();
-        this.set().currentTime(12);
+        this.set().currentTime(200);
         this.set().currentIndex(0);
-        this.set().currentSrc("http://testadmin0123.oicp.net/uploads/audio/U7ZE1WdIiP7vQRD6MXrL6Yvr.mp3");
+        this.addToPlayList({ src: "http://weixin.shangyang123.com/video/test1.mp3" })
     },
     //播放
     play: function() {
+        this.set().currentSrc(this.playList[this.currentIndex].src);
         this.Audio.load();
+        this.set().currentTime(this.currentTime);
         this.Audio.play();
         this.utils().startTimer();
     },
@@ -40,7 +45,7 @@ MXJplayer.prototype = {
     pause: function() {
         console.log(this);
         this.Audio.pause();
-        this.utils().closeTimer();
+        this.utils().clearTimer();
     },
     //上一曲
     prev: function() {
@@ -68,7 +73,19 @@ MXJplayer.prototype = {
             }
         } else if (song.constructor === Object) {
             //需要判断对象的格式是否正确
-            this.playList.push(object);
+            this.playList.unshift(song);
+        }
+    },
+    initEvent: function() {
+        var _this = this;
+        var eventArr = [".mxjp-play-stop", ".mxjp-prev", ".mxjp-next"];
+        for (var i = 0, len = eventArr.length; i < len; i++) {
+            console.log(document.querySelector(eventArr[i]))
+            document.querySelector(eventArr[i]).onclick = function() {
+                if (this.getAttribute("class").search(/mxjp-play-stop/)!==-1) {
+                    _this.play();
+                }
+            }
         }
     },
     //工具方法组
@@ -86,79 +103,62 @@ MXJplayer.prototype = {
             createAudioHtml: function() {
                 var audio = document.createElement("audio");
                 audio.setAttribute("id", "MXJplayer");
-                document.body.append(audio);
+                document.body.appendChild(audio);
                 _this.Audio = audio;
-            },
-            createPlayerPanel: function() {
-                //播放器面板容器
-                var container = document.createElement("div");
-                container.setAttribute("class", "MXJplayer");
-                //控制面板容器，播放，暂停，上一曲，下一曲
-                var controlPanel = document.createElement("div");
-                controlPanel.setAttribute("class", "control-panel");
-                //播放暂停
-                var playOrPauseBtn = document.createElement("div");
-                playOrPauseBtn.setAttribute("class", "play-stop control-btn");
-                playOrPauseBtn.innerHTML = "播放";
-                //上一曲
-                var prevBtn = document.createElement("div");
-                prevBtn.setAttribute("class", "prev control-btn");
-                prevBtn.innerHTML = "上一曲";
-                //下一曲
-                var nextBtn = document.createElement("div");
-                nextBtn.setAttribute("class", "next control-btn");
-                nextBtn.innerHTML = "下一曲";
-                controlPanel.appendChild(prevBtn);
-                controlPanel.appendChild(playOrPauseBtn);
-                controlPanel.appendChild(nextBtn);
-
-                //进度条面板
-                var progressPanel = document.createElement("div");
-                progressPanel.setAttribute("class", "progress-panel");
-
-                //进度条背景
-                var progressBackground = document.createElement("div");
-                progressBackground.setAttribute("class", "progress-background progress-position");
-
-                //加载进度条
-                var progressLoad = document.createElement("div");
-                progressLoad.setAttribute("class", "progress-load progress-position");
-
-                //当前播放进度条
-                var progressPlayer = document.createElement("div");
-                progressPlayer.setAttribute("class", "progress-player progress-position");
-
-                //进度条上的控制点
-                var progressControlPointer = document.createElement("div");
-                progressControlPointer.setAttribute("class", "progress-control-pointer");
-
-                progressPanel.appendChild(progressControlPointer);
-                progressPanel.appendChild(progressBackground);
-                progressPanel.appendChild(progressLoad);
-                progressPanel.appendChild(progressPlayer);
-
-                container.appendChild(progressPanel);
-                container.appendChild(controlPanel);
-                document.body.appendChild(container);
-
             },
             startTimer: function() {
                 if (_this.timer === null) {
                     _this.timer = setInterval(function() {
                         _this.currentTime = _this.Audio.currentTime;
                         _this.playProgress = parseFloat(_this.Audio.currentTime / _this.Audio.duration).toFixed(2);
-                        console.log(_this.playProgress);
-                        document.querySelector(".progress-player").style.width = _this.playProgress * 100 + "%";
-                        document.querySelector(".progress-control-pointer").style.marginLeft = "calc("+_this.playProgress * 100 + "% - 20px)";
                         var buffered = _this.Audio.buffered.end(0);
                         _this.loadProgress = parseFloat(buffered / _this.Audio.duration).toFixed(2);
-                        document.querySelector(".progress-load").style.width = _this.loadProgress * 100 + "%";
+
+                        _this.update().loadProgress(_this.loadProgress);
+                        _this.update().playProgress(_this.playProgress);
+                        _this.update().progressControlPointer(_this.playProgress);
+                        _this.update().currentTime(_this.Audio.currentTime);
+                        _this.update().duration(_this.Audio.duration);
+
+                        _this.Audio.onended = function() {
+                            _this.currentIndex += 1;
+                            console.log(_this.playList)
+                            console.log(_this.currentIndex + "     " + _this.playList.length)
+                            if (_this.currentIndex < _this.playList.length) {
+                                _this.set().currentTime(0);
+                                _this.play();
+                            } else {
+                                console.log("播放列表播放结束！")
+                                _this.utils().clearTimer();
+                            }
+                        }
+
                     }, 1000);
                 }
             },
-            closeTimer: function() {
+            clearTimer: function() {
                 clearInterval(_this.timer);
                 _this.timer = null;
+            }
+        }
+    },
+    update: function() {
+        var _this = this;
+        return {
+            currentTime: function(currentTime) {
+                document.querySelector(".mxjp-current-time").innerHTML = currentTime;
+            },
+            playProgress: function(playProgress) {
+                document.querySelector(".mxjp-player-progress").style.width = playProgress * 100 + "%";
+            },
+            progressControlPointer: function(progressControlPointer) {
+                document.querySelector(".mxjp-progress-control-pointer").style.marginLeft = "calc(" + progressControlPointer * 100 + "%)";
+            },
+            loadProgress: function(loadProgress) {
+                document.querySelector(".mxjp-load-progress").style.width = loadProgress * 100 + "%";
+            },
+            duration: function(duration) {
+                document.querySelector(".mxjp-duration").innerHTML = duration;
             }
         }
     },
@@ -168,11 +168,11 @@ MXJplayer.prototype = {
         return {
             currentTime: function(time) {
                 _this.currentTime = time;
-                _this.Audio.currentTime = _this.currentTime;
+                _this.Audio.currentTime = time;
             },
             currentSrc: function(src) {
                 _this.currentSrc = src;
-                _this.Audio.src = _this.currentSrc;
+                _this.Audio.src = src;
             },
             currentIndex: function(index) {
                 _this.currentIndex = index;
