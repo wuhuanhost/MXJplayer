@@ -41,7 +41,7 @@
 			this.utils().createAudioHtml();
 			this.set().currentTime(0);
 			this.set().currentIndex(0);
-			this.addToPlayList({ src: "http://weixin.shangyang123.com/video/test1.mp3" })
+			this.addToPlayList({ src: "http://weixin.shangyang123.com/video/test1.mp3" });
 		},
 		//播放
 		play: function() {
