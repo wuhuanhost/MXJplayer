@@ -15,7 +15,9 @@
 		//播放器对象
 		this.Audio = null;
 		//播放列表
-		this.playList = []; 
+		this.playList = [];
+		//播放列表的数量
+		this.countPlaylist=0;
 		//当前播放音频在播放列表中的下标
 		this.currentIndex = 0;
 		//当前音频播放到第几秒了
@@ -64,7 +66,7 @@
 		},
 		//下一曲
 		next: function() {
-			var playListLength = this.playList.length;
+			var playListLength = this.countPlaylist;
 			if (index < playListLength - 1) {
 				this.currentIndex += 1;
 			}
@@ -79,10 +81,12 @@
 				for (var i = 0, len = song.length; i < len; i++) {
 					//需要判断对象的格式是否正确
 					this.playList.push(song[i]);
+					this.countPlaylist=this.countPlaylist+1;//播放列表的条数+1
 				}
 			} else if (song.constructor === Object) {
 				//需要判断对象的格式是否正确
 				this.playList.unshift(song);
+				this.countPlaylist=this.countPlaylist+1;//播放列表的条数+1
 			}
 		},
 		initEvent: function() {
